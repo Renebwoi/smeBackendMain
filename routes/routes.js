@@ -64,6 +64,12 @@ router.post('/checkUser', async (req, res) => {
 // endpoint for registering a new user
 router.post('/post', async (req, res) => {
     try {
+        // Check if the email already exists
+        const existingUser = await users.findOne({ email: req.body.email });
+        if (existingUser) {
+            return res.status(400).json({ message: "Email already exists" });
+        }
+
         // Fetch the last document
         const lastRecord = await users.findOne().sort({ id: -1 });
 
