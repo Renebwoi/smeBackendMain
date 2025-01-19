@@ -197,6 +197,39 @@ router.post('/businessShow', async (req, res) => {
         // Determine the new id
         const newId = lastRecord ? lastRecord.id + 1 : 1;
 
+        // posting the details to the ai endpoint for prediction
+        const aIdata = {
+            how_long_has_your_business_been_active: req.body.businessInfo.businessAge,
+            what_type_of_business_do_you_run: req.body.businessInfo.businessType,
+            in_which_industry_does_your_business_operate: req.body.businessInfo.businessIndustry,
+            lga_of_business: req.body.businessInfo.businessLGA,
+            town_of_business: req.body.businessInfo.businessTown,
+            do_you_have_a_bank_account_for_your_business: req.body.financeInfo.bankAccountQuestion,
+            do_you_use_any_digital_payment_systems: req.body.financeInfo.digitalPaymentQuestion,
+            how_do_you_manage_your_business_finances: req.body.financeInfo.businessFinanceQuestion,
+            what_are_the_biggest_challenges_your_business_faces: req.body.challengeInfo.biggestChallengesQuestion,
+            what_kind_of_support_would_you_like_from_government: req.body.challengeInfo.govtSupportQuestion,
+            what_would_help_your_business_grow_the_most: req.body.challengeInfo.businessGrowthQuestion,
+            have_you_ever_tried_to_get_a_loan_for_your_business: req.body.loanInfo.loanBeforeQuestion,
+            if_yes_how_did_you_get_the_loan: req.body.loanInfo.loanHowQuestion,
+            if_you_did_not_get_a_loan_what_was_the_main_reason: req.body.loanInfo.whyNoLoan,
+            have_you_faced_any_issues_with_government_rules_or_taxes: req.body.regulatoryInfo.regulatoryChallengeQuestion,
+        }
+        // post aIdata to the ai endpoint
+        const aIresponse = await fetch('https://4c95-102-90-44-36.ngrok-free.app/predict', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(aIdata),
+        });
+        const aIresponseJson = await aIresponse.json();
+        console.log("aIresponseJson", aIresponseJson);
+
+        // if airesponseJson is "Eligible for Loan" change it to "Accepted", if it is "Not Eligible for Loan" change it to "Rejected"
+        let loanStatus = aIresponseJson == "Eligible for Loan" ? "Accepted" : "Rejected";
+        console.log("loanStatus", loanStatus);
+
         // Create a new document
         // console.log("req.body.personalInfo", req.body.personalInfo)
         const data = new loanQuestionnaire({
@@ -209,7 +242,7 @@ router.post('/businessShow', async (req, res) => {
             regulatoryInfo: req.body.regulatoryInfo,
             username: req.body.username,
             usercookie: req.body.usercookie,
-            loanStatus: randomDecision(5)
+            loanStatus: loanStatus
         });
 
         // Save the new document
