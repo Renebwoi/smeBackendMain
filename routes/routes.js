@@ -216,7 +216,7 @@ router.post('/businessShow', async (req, res) => {
             have_you_faced_any_issues_with_government_rules_or_taxes: req.body.regulatoryInfo.regulatoryChallengeQuestion,
         }
         // post aIdata to the ai endpoint
-        const aIresponse = await fetch('https://4c95-102-90-44-36.ngrok-free.app/predict', {
+        const aIresponse = await fetch('https://c7cb-197-210-84-126.ngrok-free.app/predict', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -242,7 +242,7 @@ router.post('/businessShow', async (req, res) => {
             regulatoryInfo: req.body.regulatoryInfo,
             username: req.body.username,
             usercookie: req.body.usercookie,
-            loanStatus: loanStatus
+            loanStatus: loanStatus || randomDecision(5)
         });
 
         // Save the new document
